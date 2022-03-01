@@ -6,11 +6,13 @@ var loseAudio = new Audio('./audio/loseSound.mp4');
 var winAudio = new Audio('./audio/winSound.mp4');
 
 //Listeners
-var rightListener = function (event) {
+var rightListener = async function (event) {
+    await flashColor(event.currentTarget, 75)
     rightColorClicked()
 };
 
-var wrongListener = function (event) {
+var wrongListener = async function (event) {
+    await flashColor(event.currentTarget, 75)
     wrongColorClicked()
 };
 
@@ -41,6 +43,8 @@ function continueGame() {
 async function* game() {
     const colors = returnArrayColors()
     order = []
+
+    //Raffling...
     for(i = 0; i < sequenceNumber; i++){
         order.push(Math.floor(Math.random() * 4))
     }
@@ -50,9 +54,7 @@ async function* game() {
     //Shining...
     for(i in order){
         const myColor = colors[order[i]]
-        await shineColor(myColor);
-        await delay(500)
-        cleanColors(colors)
+        await flashColor(myColor, 500);
         await delay(100)
     }
     cleanColors(colors)
@@ -77,12 +79,17 @@ async function* game() {
 
 //Assist functions
 function delay(time) {
-    return new Promise(resolve => setTimeout(resolve, time));
+    return new Promise((resolve) => {setTimeout(resolve, time)});
 }
 
-async function shineColor(color){
+function shineColor(color){
     let id = color.id
     color.className = id + " selected"
+}
+
+function turnOffColor(color){
+    let id = color.id
+    color.className = id
 }
 
 function cleanColors(colors) {
@@ -90,6 +97,12 @@ function cleanColors(colors) {
         let id = colors[i].id
         colors[i].className = id
     }
+}
+
+async function flashColor(color, time) {
+    shineColor(color)
+    await delay(time)
+    turnOffColor(color)
 }
 
 function addListeners(rightColor, colors) {
@@ -115,7 +128,6 @@ function removeListeners(rightColor, colors) {
 function rightColorClicked() {
     score++
     newGame.next()
-
 }
 
 function wrongColorClicked() {
